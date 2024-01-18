@@ -1,7 +1,8 @@
 import express from 'express';
 import mongoose from 'mongoose';
 import { PORT, mongodbURL } from './config.js'
-import certificateRoutes from './routes/certificates.js';
+import certificateRoutes from './routes/certificateRoutes.js';
+import courseRoutes from './routes/courseRoutes.js';
 import cors from "cors";
 
 const app = express();
@@ -16,6 +17,7 @@ app.get('/', (request, response) => {
 });
 
 app.use('/api/certificates', certificateRoutes);
+app.use('/api/course', courseRoutes);
 
 mongoose
     .connect(mongodbURL)
