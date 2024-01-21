@@ -5,6 +5,10 @@ const certificateTemplateSchema = new mongoose.Schema(
     template: {
       type: String,
       required: true
+    },
+    type: {
+      type: String,
+      required: true
     }
   }
 )

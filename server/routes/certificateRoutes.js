@@ -13,21 +13,26 @@ router.post('/', async (req, res) => {
   }
 })
 
-router.get('/', async (req, res) => {
+router.get('/types', async (req, res) => {
   try {
-    const certificate = await CertificateTemplate.find({});
-    return res.status(200).json(certificate);
-  } catch (error) {
-    return res.status(500).json('Unable to get Templates');
-  }
-})
-
-router.get('/:id', async (req, res) => {
-  try {
-    const certificate = await CertificateTemplate.findById(req.params.id);
+    const certificate = await CertificateTemplate.distinct('type');
     return res.status(200).json(certificate);
   } catch (error) {
     return res.status(500).json({ error: 'Internal Server Error' });
+  }
+});
+
+router.get('/', async (request, response) => {
+  try {
+      const { type } = request.query;
+
+      const certificate = await CertificateTemplate.find({type:type});
+      // console.log(type);
+      // console.log(certificate);
+      return response.status(200).json(certificate);
+  } catch (error) {
+      console.log(error.message);
+      response.status(500).send({ message: error.message });
   }
 });
 
