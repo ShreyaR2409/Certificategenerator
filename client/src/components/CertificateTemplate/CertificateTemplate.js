@@ -1,6 +1,7 @@
 import React, { useState, useRef, useEffect } from 'react';
 import axios from 'axios';
 import html2canvas from 'html2canvas';
+import html2pdf from 'html2pdf.js';
 import Image from '../../assets/logo.png';
 import styled from 'styled-components';
 
@@ -94,14 +95,17 @@ const CertificateTemplate = () => {
     }
   };
 
-  const downloadCertificate = () => {
+  const downloadCertificate = async (format) => {
     if (certificateRef.current) {
       const scale = 2;
-      html2canvas(certificateRef.current, {
-        scale: scale,
-        windowWidth: document.body.scrollWidth,
-        windowHeight: document.body.scrollHeight,
-      }).then((canvas) => {
+
+      if (format === 'png') {
+        const canvas = await html2canvas(certificateRef.current, {
+          scale: scale,
+          windowWidth: document.body.scrollWidth,
+          windowHeight: document.body.scrollHeight,
+        });
+
         const link = document.createElement('a');
         document.body.appendChild(link);
 
@@ -110,9 +114,37 @@ const CertificateTemplate = () => {
         link.click();
 
         document.body.removeChild(link);
-      });
+      } else if (format === 'pdf') {
+        const contentWidth = certificateRef.current.offsetWidth;
+        const contentHeight = certificateRef.current.offsetHeight;
+        const orientation = contentWidth > contentHeight ? 'landscape' : 'portrait';
+        const pdfOptions = {
+          // margin: 0,
+          filename: 'certificate.pdf',
+          image: { type: 'png', quality: 1 },
+          html2canvas: { scale: scale },
+          jsPDF: { unit: 'mm', format: 'a4', orientation: orientation },
+          width: contentWidth,
+        };
+
+        const pdfBlob = await html2pdf().from(certificateRef.current).set(pdfOptions).outputPdf('blob');
+
+        const blobUrl = URL.createObjectURL(pdfBlob);
+
+        const link = document.createElement('a');
+        link.href = blobUrl;
+        link.download = 'certificate.pdf';
+        document.body.appendChild(link);
+        link.click();
+
+        document.body.removeChild(link);
+        URL.revokeObjectURL(blobUrl);
+      }
     }
   };
+
+
+
 
   return (
     <CertificateForm>
@@ -170,21 +202,22 @@ const CertificateTemplate = () => {
       <ButtonStyle onClick={generateCertificate}>Generate Certificate</ButtonStyle>
       {showCertificate && (
         <>
-          <div className="certificateDiv" style={{ width: '860px', height: '695px', margin: 'auto' }}>
+          <div className="certificateDiv" style={{ width: '860px', margin: 'auto' }}>
             <div
               ref={certificateRef}
               dangerouslySetInnerHTML={{
                 __html: template.template
-                        .replace('${recipientName}', recipientName)
-                        .replace('https://leapottechnologies.graphy.com/logo.png', Image)
-                        .replace('${courseName}', courseName)
-                        .replace('${completionDate}', completionDate)
-                        .replace('${serialNumber}', certificateId)
-                        .replace('${issuedDate}', new Date().toLocaleDateString())
-              }} 
+                  .replace('${recipientName}', recipientName)
+                  .replace('https://leapottechnologies.graphy.com/logo.png', Image)
+                  .replace('${courseName}', courseName)
+                  .replace('${completionDate}', completionDate)
+                  .replace('${serialNumber}', certificateId)
+                  .replace('${issuedDate}', new Date().toLocaleDateString())
+              }}
             />
           </div>
-          <ButtonStyle onClick={downloadCertificate}>Download Certificate</ButtonStyle>
+          <ButtonStyle onClick={() => downloadCertificate('png')}>Download Certificate as PNG</ButtonStyle>
+          <ButtonStyle onClick={() => downloadCertificate('pdf')}>Download Certificate as PDF</ButtonStyle>
         </>
       )}
     </CertificateForm>

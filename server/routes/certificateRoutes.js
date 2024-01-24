@@ -5,8 +5,8 @@ const router = express.Router();
 
 router.post('/', async (req, res) => {
   try {
-    const object = req.body;
-    const certificate = await CertificateTemplate.create(object);
+    const templateData = req.body;
+    const certificate = await CertificateTemplate.create(templateData);
     return res.status(200).json(certificate);
   } catch (error) {
     return res.status(500).json('Unable to POST Template');
