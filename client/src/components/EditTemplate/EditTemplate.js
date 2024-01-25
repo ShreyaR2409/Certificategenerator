@@ -18,17 +18,16 @@ const CertificatePreview = styled.div`
   border: 1px solid #ddd;
   padding: 20px;
   margin-top: 20px;
-  width: ${(props) => (props.orientation === 'landscape' ? '100%' : '50%')};
+  width: ${(props) => (props.orientation === 'Landscape' ? '100%' : '50%')};
   margin: 0 auto;
 `;
 
 const EditTemplate = () => {
   const [dropdownValues, setDropdownValues] = useState([]);
   const [selectedValue, setSelectedValue] = useState('');
-  const [template, setTemplate] = useState('');
+  const [template, setTemplate] = useState(null);
   const [content, setContent] = useState('');
-  const [orientation, setOrientation] = useState('landscape'); 
-  const quillRef = useRef(null);
+  const [orientation, setOrientation] = useState('Landscape');
   const editor = useRef(null);
 
   useEffect(() => {
@@ -44,25 +43,16 @@ const EditTemplate = () => {
     fetchDropdownValues();
   }, []);
 
-  const handleEditorInit = (newEditor) => {
-    editor.current = newEditor;
-  };
-
-  const getCertificateTemplate = async (selectedValue) => {
+  const getCertificateTemplate = async () => {
     try {
-      const response = await axios.get(`http://localhost:5000/api/certificates?type=${selectedValue}`);
+      const response = await axios.get(`http://localhost:5000/api/certificates?type=${selectedValue}&orientation=${orientation}`);
+      console.log('Request URL:', `http://localhost:5000/api/certificates?type=${selectedValue}&orientation=${orientation}`);
+
       if (response.data.length > 0) {
-        console.log(response.data[0]);
         setTemplate(response.data[0]);
-
-        if (editor.current) {
-          console.log('Before setting value:', editor.current);
-          setContent(response.data[0].template);
-          console.log('After setting value:', editor.current);
-        }
-
+        setContent(response.data[0].template);
       } else {
-        console.error('No template found for the selected value.');
+        console.error('No template found for the selected value and orientation.');
       }
     } catch (error) {
       console.error('Error fetching certificate template:', error);
@@ -85,7 +75,7 @@ const EditTemplate = () => {
   };
 
   return (
-    <div style={{ width: '800px', margin: 'auto', textAlign: 'center', fontFamily: 'Roboto' }}>
+    <div>
       <h1>Edit Template</h1>
       <label>
         Template:
@@ -102,23 +92,23 @@ const EditTemplate = () => {
       <label>
         Certificate Orientation:
         <select value={orientation} onChange={(e) => setOrientation(e.target.value)}>
-          <option value="landscape">Landscape</option>
-          <option value="portrait">Portrait</option>
+          <option value="Landscape">Landscape</option>
+          <option value="Portrait">Portrait</option>
         </select>
       </label>
 
       <div style={{ width: '800px', margin: 'auto' }}>
         <h3>Edit Template</h3>
 
-          <JoditEditor
-			ref={editor}
-      value={content}
-      onChange={(newContent) => setContent(newContent)}
-		/>
+        <JoditEditor
+          ref={editor}
+          value={content}
+          onChange={(newContent) => setContent(newContent)}
+        />
 
         <br />
-        <ButtonStyle onClick={() => getCertificateTemplate(selectedValue)}>Get</ButtonStyle>
-        <ButtonStyle onClick={() => updateTemplate(selectedValue)}>Update</ButtonStyle>
+        <ButtonStyle onClick={getCertificateTemplate}>Get</ButtonStyle>
+        <ButtonStyle onClick={updateTemplate}>Update</ButtonStyle>
       </div>
     </div>
   );

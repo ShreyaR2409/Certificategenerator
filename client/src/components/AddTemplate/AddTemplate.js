@@ -7,34 +7,39 @@ function AddTemplate() {
     const [width, setWidth] = useState('5');
     const [style, setStyle] = useState('solid');
     const styles = {
+        
         'Landscape': 'width: 800px; height: 600px; ',
-        'Portrait': 'width: 210mm; height: 297mm; ',
+        'Portrait': 'width: 794px; height: 1123px; ',
         'Border': `border: ${width}px ${style} ${color};`
     };
 
-    const [orientationStyle, setOrientationStyle] = useState(styles['Landscape'])
+    const [orientationStyle, setOrientationStyle] = useState(styles['Portrait'])
     const [borderStyle, setBorderStyle] = useState('')
     const [showBorderColor, setShowBorderColor] = useState(false);
+    const [orientation, setOrientation] = useState('Portrait');
+    const [type, setType] = useState('');
     const [template, setTemplate] = useState(`<div style="${orientationStyle}">\n</div>`);
-
     const [showEditor, setShowEditor] = useState(false);
+    const [selectedOrientation, setSelectedOrientation] = useState('Portrait');
 
     const createTemplate = async () => {
-        console.log(template)
-
         try {
-            const templateData = {
-                template: template,
-            };
-
-            await axios.post('http://localhost:5000/api/certificates', templateData)
-            setTemplate('');
-            window.alert('Created new certificate template successfully!');
+          const templateData = {
+            type: type,
+            template: template,
+            orientation: orientation,
+          };
+    
+          await axios.post('http://localhost:5000/api/certificates', templateData);
+    
+          setType('');
+          setTemplate('');
+          setOrientation('Portrait');
+          window.alert('Created new certificate template successfully!');
         } catch (error) {
-            console.error('Error creating certificate template:', error);
+          console.error('Error creating certificate template:', error);
         }
-
-    };
+      };
 
     const wantBorder = () => {
         setShowBorderColor(!showBorderColor);
@@ -57,34 +62,45 @@ function AddTemplate() {
         console.log(template)
     }
 
-    const setOrientationMethod = (selectedOrientation) => {
-        setOrientationStyle(styles[selectedOrientation])
-    }
+    const setOrientationMethod = (e) => {
+        setSelectedOrientation(e.target.value);
+        setOrientationStyle(styles[e.target.value]);
+        setOrientation(e.target.value); 
+      };
 
     return (
         <div>
             <div>
                 <p style={{display: 'flex', alignItems: "center", gap: '20px'}}>
                     Select Orientation Type: 
-                    <select>
-                        <option onClick={() => setOrientationMethod('Landscape')} style={{cursor: 'pointer'}}>Landscape</option>
-                        <option onClick={() => setOrientationMethod('Portrait')} style={{cursor: 'pointer'}}>Portrait</option>
+                    <select onChange={setOrientationMethod} value={selectedOrientation}>
+                        <option value="Landscape">Landscape</option>
+                        <option value="Portrait">Portrait</option>
                     </select>
                 </p>
                 <div style={{display: 'flex', alignItems: 'center', gap: '20px'}}>
-                    <p style={{display: "flex", alignItems: "center", gap: '20px', cursor: 'pointer'}} onClick={wantBorder}>
-                        <input type="checkbox" checked={showBorderColor} /><p>Want Border?</p>
-                    </p>
-                    { showBorderColor ? <p>Border Color: <input type="text" onChange={(e) => {setColor(e.target.value)}} /></p> : <></> }
+                     <label>
+                        <input type="checkbox" checked={showBorderColor} onChange={wantBorder} />
+                        <span>Want Border?</span>
+                    </label>
+                    { showBorderColor ? <p>Border Color: <input type="color" onChange={(e) => {setColor(e.target.value)}} /></p> : <></> }
                     { showBorderColor ? <p>Border Width: <input type="text" onChange={(e) => {setWidth(e.target.value)}} placeholder='Enter value in pixels...' /></p> : <></> }
                     { showBorderColor ? <p>Border Style: <input type="text" onChange={(e) => {setStyle(e.target.value)}} /></p> : <></> }
                 </div>
-                <button onClick={showEditorMethod}>Generate</button>
             </div>
+            <button onClick={showEditorMethod}>Generate</button>
             <form>
+            <label>
+          Type
+          <input
+            type="text"
+            value={type}
+            onChange={(e) => setType(e.target.value)}
+          />
+        </label>
                 <br></br>
                 <br></br>
-                { showEditor ?
+                
                     <div>
                         <JoditEditor
                             value={template}
@@ -96,8 +112,8 @@ function AddTemplate() {
                         <br></br>
                         <br></br>
                         <button onClick={createTemplate}>Create</button>
-                    </div> : <></>
-                }   
+                    </div> 
+                
             </form>
         </div>
     );

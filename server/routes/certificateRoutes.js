@@ -24,11 +24,11 @@ router.get('/types', async (req, res) => {
 
 router.get('/', async (request, response) => {
   try {
-      const { type } = request.query;
+      const { type, orientation } = request.query;
 
-      const certificate = await CertificateTemplate.find({type:type});
-      // console.log(type);
-      // console.log(certificate);
+      const certificate = await CertificateTemplate.find({type:type, orientation:orientation});
+      console.log(type);
+      console.log(orientation);
       return response.status(200).json(certificate);
   } catch (error) {
       console.log(error.message);

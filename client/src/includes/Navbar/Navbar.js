@@ -23,7 +23,7 @@ const Navbar = () => {
       <ButtonContainer>
         <ButtonStyle> <Link to='/'>Generate Certificates</Link></ButtonStyle>
         <ButtonStyle><Link to='/editCertificateTemplate'>Edit Certificates Template</Link></ButtonStyle>
-        <ButtonStyle><Link to='/addtemplate'>Add Template</Link></ButtonStyle>
+        <ButtonStyle><Link to='/addtemplate'>Design Certificate</Link></ButtonStyle>
         {/* <ButtonStyle><Link to='/editTemplateForm'>Edit form</Link></ButtonStyle> */}
         {/* <Link to='/addCourse'>Add Course</Link> */}
         </ButtonContainer>

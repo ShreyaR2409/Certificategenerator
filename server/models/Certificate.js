@@ -9,6 +9,10 @@ const certificateTemplateSchema = new mongoose.Schema(
     type: {
       type: String,
       required: true
+    },
+    orientation: {
+      type: String,
+      required: true
     }
   }
 )
