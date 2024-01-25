@@ -41,7 +41,6 @@ const ButtonStyle = styled.button`
 `;
 
 const CertificateTemplate = () => {
-  const certificateId = '65aa707197ef135d84973abd';
   const [dropdownValues, setDropdownValues] = useState([]);
   const [selectedValue, setSelectedValue] = useState('');
   const [template, setTemplate] = useState('');
@@ -143,9 +142,6 @@ const CertificateTemplate = () => {
     }
   };
 
-
-
-
   return (
     <CertificateForm>
       <CertificateInputForm>
@@ -202,7 +198,7 @@ const CertificateTemplate = () => {
       <ButtonStyle onClick={generateCertificate}>Generate Certificate</ButtonStyle>
       {showCertificate && (
         <>
-          <div className="certificateDiv" style={{ width: '860px', margin: 'auto' }}>
+          <div className="certificateDiv" style={{ margin: 'auto', boxSizing: 'border-box' }}>
             <div
               ref={certificateRef}
               dangerouslySetInnerHTML={{
@@ -211,15 +207,17 @@ const CertificateTemplate = () => {
                   .replace('https://leapottechnologies.graphy.com/logo.png', Image)
                   .replace('${courseName}', courseName)
                   .replace('${completionDate}', completionDate)
-                  .replace('${serialNumber}', certificateId)
+                  .replace('${serialNumber}', template._id)
                   .replace('${issuedDate}', new Date().toLocaleDateString())
               }}
+              style={{ boxSizing: 'border-box' }}
             />
           </div>
           <ButtonStyle onClick={() => downloadCertificate('png')}>Download Certificate as PNG</ButtonStyle>
           <ButtonStyle onClick={() => downloadCertificate('pdf')}>Download Certificate as PDF</ButtonStyle>
         </>
       )}
+      <div className='w-40 h-20 bg-black'></div>
     </CertificateForm>
   );
 };
