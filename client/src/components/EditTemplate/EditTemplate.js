@@ -12,6 +12,7 @@ const ButtonStyle = styled.button`
   margin-bottom: 20px;
   border: transparent;
   margin-right: 20px;
+  cursor: pointer;
 `;
 
 const CertificatePreview = styled.div`
@@ -27,8 +28,9 @@ const EditTemplate = () => {
   const [selectedValue, setSelectedValue] = useState('');
   const [template, setTemplate] = useState(null);
   const [content, setContent] = useState('');
-  const [orientation, setOrientation] = useState('Landscape');
+  const [orientation, setOrientation] = useState('');
   const editor = useRef(null);
+  const [showUpdateButton, setShowUpdateButton] = useState(false);
 
   useEffect(() => {
     const fetchDropdownValues = async () => {
@@ -44,18 +46,23 @@ const EditTemplate = () => {
   }, []);
 
   const getCertificateTemplate = async () => {
-    try {
-      const response = await axios.get(`http://localhost:5000/api/certificates?type=${selectedValue}&orientation=${orientation}`);
-      console.log('Request URL:', `http://localhost:5000/api/certificates?type=${selectedValue}&orientation=${orientation}`);
+    if(selectedValue === '' || orientation === '') {
+      window.alert('Please select all the required fields!')
+    } else {
+      try {
+        const response = await axios.get(`http://localhost:5000/api/certificates?type=${selectedValue}&orientation=${orientation}`);
+        console.log('Request URL:', `http://localhost:5000/api/certificates?type=${selectedValue}&orientation=${orientation}`);
 
-      if (response.data.length > 0) {
-        setTemplate(response.data[0]);
-        setContent(response.data[0].template);
-      } else {
-        console.error('No template found for the selected value and orientation.');
+        if (response.data.length > 0) {
+          setTemplate(response.data[0]);
+          setContent(response.data[0].template);
+          setShowUpdateButton(true);
+        } else {
+          console.error('No template found for the selected value and orientation.');
+        }
+      } catch (error) {
+        console.error('Error fetching certificate template:', error);
       }
-    } catch (error) {
-      console.error('Error fetching certificate template:', error);
     }
   };
 
@@ -92,6 +99,7 @@ const EditTemplate = () => {
       <label>
         Certificate Orientation:
         <select value={orientation} onChange={(e) => setOrientation(e.target.value)}>
+          <option value="">Select an Orientation</option>
           <option value="Landscape">Landscape</option>
           <option value="Portrait">Portrait</option>
         </select>
@@ -108,7 +116,7 @@ const EditTemplate = () => {
 
         <br />
         <ButtonStyle onClick={getCertificateTemplate}>Get</ButtonStyle>
-        <ButtonStyle onClick={updateTemplate}>Update</ButtonStyle>
+        { showUpdateButton ? <ButtonStyle onClick={updateTemplate}>Update</ButtonStyle> : <></>}
       </div>
     </div>
   );

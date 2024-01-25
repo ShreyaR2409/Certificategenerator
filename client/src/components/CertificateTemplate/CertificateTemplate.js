@@ -68,9 +68,9 @@ const CertificateTemplate = () => {
 
   const getCertificateTemplate = async (selectedValue) => {
     try {
-      const response = await axios.get(`http://localhost:5000/api/certificates?type=${selectedValue}`);
+      const response = await axios.get(`http://localhost:5000/api/certificates/type?type=${selectedValue}`);
       setTemplate(response.data[0]);
-      // console.log(response.data);
+      console.log(response.data);
     } catch (error) {
       console.error('Error fetching certificate template:', error);
     }

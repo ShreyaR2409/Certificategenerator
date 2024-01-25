@@ -22,14 +22,30 @@ router.get('/types', async (req, res) => {
   }
 });
 
+router.get('/type/', async (request, response) => {
+  try {
+    const { type } = request.query;
+      const certificate = await CertificateTemplate.find({type:type});
+      console.log(type);
+      return response.status(200).json(certificate);
+  } catch (error) {
+      console.log(error.message);
+      response.status(500).send({ message: error.message });
+  }
+});
+
 router.get('/', async (request, response) => {
   try {
-      const { type, orientation } = request.query;
-
+    const { type, orientation } = request.query;
+    if(type || orientation) {
       const certificate = await CertificateTemplate.find({type:type, orientation:orientation});
       console.log(type);
       console.log(orientation);
       return response.status(200).json(certificate);
+    } else {
+      const certificate = await CertificateTemplate.find();
+      return response.status(200).json(certificate);
+    }
   } catch (error) {
       console.log(error.message);
       response.status(500).send({ message: error.message });
