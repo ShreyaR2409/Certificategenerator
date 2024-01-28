@@ -4,9 +4,9 @@ import { PORT, mongodbURL } from './config.js'
 import certificateRoutes from './routes/certificateRoutes.js';
 import courseRoutes from './routes/courseRoutes.js';
 import cors from "cors";
+import path from 'path';
+import multer from 'multer';
 // import { upload } from './multerConfig.js';
-// import path from 'path';
-// import multer from 'multer';
 // import fs from 'fs';
 
 // const __filename = new URL(import.meta.url).pathname;
@@ -45,7 +45,21 @@ app.use(cors());
 
   // });
 
+const storage = multer.diskStorage({
+  destination: './uploads', // Change this to your desired upload folder
+  filename: (req, file, cb) => {
+    cb(null, `${file.fieldname}-${Date.now()}${path.extname(file.originalname)}`);
+  },
+});
 
+const upload = multer({ storage });
+app.use('/uploads', express.static('uploads'));
+
+app.post('/upload', upload.single('image'), (req, res) => {
+  const imageUrl = `/uploads/${req.file.filename}`;
+
+  res.json({ imageUrl });
+});
 
 app.get('/', (request, response) => {
   console.log(request);

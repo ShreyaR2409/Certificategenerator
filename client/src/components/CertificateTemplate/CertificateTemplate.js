@@ -1,9 +1,9 @@
 import React, { useState, useRef, useEffect } from 'react';
 import axios from 'axios';
 import html2canvas from 'html2canvas';
-import html2pdf from 'html2pdf.js';
 import Image from '../../assets/logo.png';
 import styled from 'styled-components';
+import jsPDF from 'jspdf';
 
 const CertificateForm = styled.div`
   display: flex;
@@ -97,50 +97,44 @@ const CertificateTemplate = () => {
   const downloadCertificate = async (format) => {
     if (certificateRef.current) {
       const scale = 2;
-
+  
       if (format === 'png') {
         const canvas = await html2canvas(certificateRef.current, {
           scale: scale,
           windowWidth: document.body.scrollWidth,
           windowHeight: document.body.scrollHeight,
+          useCORS: true
         });
-
+  
         const link = document.createElement('a');
         document.body.appendChild(link);
-
+  
         link.href = canvas.toDataURL('image/png');
         link.download = 'certificate.png';
         link.click();
-
+  
         document.body.removeChild(link);
       } else if (format === 'pdf') {
         const contentWidth = certificateRef.current.offsetWidth;
         const contentHeight = certificateRef.current.offsetHeight;
+
         const orientation = contentWidth > contentHeight ? 'landscape' : 'portrait';
-        const pdfOptions = {
-          // margin: 0,
-          filename: 'certificate.pdf',
-          image: { type: 'png', quality: 1 },
-          html2canvas: { scale: scale },
-          jsPDF: { unit: 'mm', format: 'a4', orientation: orientation },
-          width: contentWidth,
-        };
+        const canvas = await html2canvas(certificateRef.current, {
+          scale,
+          windowWidth: document.body.scrollWidth,
+          windowHeight: document.body.scrollHeight,
+          useCORS: true,
+        });
+    
+        const pdf = new jsPDF({ unit: 'mm', format: 'a4', orientation });
+        const imgData = canvas.toDataURL('image/png');
+    
+        pdf.addImage(imgData, 'PNG', 0, 0, pdf.internal.pageSize.width, pdf.internal.pageSize.height);
 
-        const pdfBlob = await html2pdf().from(certificateRef.current).set(pdfOptions).outputPdf('blob');
-
-        const blobUrl = URL.createObjectURL(pdfBlob);
-
-        const link = document.createElement('a');
-        link.href = blobUrl;
-        link.download = 'certificate.pdf';
-        document.body.appendChild(link);
-        link.click();
-
-        document.body.removeChild(link);
-        URL.revokeObjectURL(blobUrl);
+        pdf.save('certificate.pdf');
       }
     }
-  };
+  };  
 
   return (
     <CertificateForm>
